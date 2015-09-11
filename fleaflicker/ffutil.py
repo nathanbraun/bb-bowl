@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup as Soup
 import os
 
 ffcom = 'http://www.fleaflicker.com'
+positions = ['QB', 'RB1', 'RB2', 'WR1', 'WR2', 'TE', 'K', 'D']
+
 
 def _matchup_urls(league_id = 34958):
     """ Get urls to every matchup for current week given some league_id
@@ -30,8 +32,6 @@ def _single_matchup(matchup_url):
     proc_url = requests.get(raw_url)
     soup = Soup(proc_url.text, "lxml")
 
-    positions = ['QB', 'RB1', 'RB2', 'WR1', 'WR2', 'TE', 'K', 'D']
-
     player_str = 'row_{0}_0_{1}'
 
     teams = {}
@@ -55,7 +55,8 @@ def starting_lineups(league_id = 34958):
 
     for i, mu in enumerate(_matchup_urls(league_id)):
         single_matchup = DataFrame(_single_matchup(mu))
-        linups = pd.concat([lineups, single_matchup], axis=1)
+        lineups = pd.concat([lineups, single_matchup], axis=1)
 
     lineups.columns = ['team{0}'.format(x) for x in range(12)] 
-    return lineups
+    
+    return lineups.reindex(positions)
